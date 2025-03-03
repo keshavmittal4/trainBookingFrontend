@@ -22,7 +22,8 @@ const Signup = () => {
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
-      navigate("/seatbooking"); // Redirect to dashboard or homepage
+      alert("Signup successful");
+      navigate("/"); // Redirect to dashboard or homepage
     } catch (error) {
       console.error("Login failed", error.response?.data || error.message);
       alert("Invalid credentials, please try again");
