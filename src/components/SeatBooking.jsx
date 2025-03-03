@@ -85,6 +85,7 @@ const SeatBooking = () => {
           (prevAvailable) => prevAvailable - newBookedSeats.length
         );
         fetchSeatsData();   // refreshing the seat data
+        alert("Seats booked successfully");
       } else {
         console.error("Unexpected API response:", response.data);
       }
@@ -143,7 +144,7 @@ const SeatBooking = () => {
             alt="Train Logo"
             className="w-8 h-8"
           />
-          <h1 className="text-lg md:text-xl font-bold">Train Ticket Booking</h1>
+          <h1 className="text-lg md:text-xl font-bold">Book Your Train</h1>
         </div>
         <button
           onClick={handleLogout}
