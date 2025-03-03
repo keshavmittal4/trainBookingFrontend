@@ -10,7 +10,6 @@ function App() {
         <Route path="/" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/seatbooking" element={<SeatBooking />} />
-        {/* <Route path="/" element={<SeatBooking />} />  */}
       </Routes>
     </Router>
   );

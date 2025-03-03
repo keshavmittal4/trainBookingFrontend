@@ -12,18 +12,18 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        // "http://localhost:5000/api/auth/login",
-        "https://trainbooking-fg34.onrender.com/api/auth/login",
+        "https://trainbooking-backend-yaa3.onrender.com/api/auth/login",
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log(response);
-      console.log("Login successful", response.data);
-      // Store token if provided
+
+      // storing the token in local storage for logout use
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
-      navigate("/seat-booking"); // Redirect to dashboard or homepage
+
+      navigate("/seatbooking"); // redirecting to dashboard 
+
     } catch (error) {
       console.error("Login failed", error.response?.data || error.message);
       alert("Invalid credentials, please try again");
@@ -31,34 +31,33 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-300">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+    <div className="flex items-center justify-center min-h-screen bg-blue-100 px-4">
+      <div className="bg-white p-6 md:p-8 rounded-lg shadow-lg max-w-md w-full">
+        {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-700">Login</h1>
+          <h1 className="text-2xl font-bold text-gray-700">Welcome Back!</h1>
+          <p className="text-gray-500">Login to continue</p>
         </div>
-        <form onSubmit={loginHandle}>
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-lg font-medium text-gray-600"
-            >
-              email
+
+        {/* Form */}
+        <form onSubmit={loginHandle} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-600">
+              Email
             </label>
             <input
-              type="text"
+              type="email"
               id="email"
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="block text-lg font-medium text-gray-600"
-            >
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-600">
               Password
             </label>
             <input
@@ -68,23 +67,27 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div>
-            <button
-              type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-md shadow-md transition-all duration-300"
-            >
-              Login
-            </button>
-          </div>
-          <Link
-            to="/signup"
-            className="underline flex items-center justify-center hover:text-blue-600 cursor-pointer mt-4"
+
+          {/* Login Button */}
+          <button
+            type="submit"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg shadow-md transition-all duration-300"
           >
-            Signup
-          </Link>
+            Login
+          </button>
+
+          {/* Signup Link */}
+          <div className="text-center mt-4">
+            <p className="text-gray-600 text-sm">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-blue-500 hover:text-blue-600 font-medium">
+                Sign up
+              </Link>
+            </p>
+          </div>
         </form>
       </div>
     </div>

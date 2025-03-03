@@ -1,113 +1,225 @@
-// Import necessary libraries
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-// Seat Booking Component
 const SeatBooking = () => {
-  // State variables
-  const [seats, setSeats] = useState(
-    Array(80).fill(null) // Initialize 80 seats as unbooked (null)
-  );
-  const [bookedCount, setBookedCount] = useState(0); // Track booked seats
+  const [totalSeats, setTotalSeats] = useState(80);
+  const [bookedSeats, setBookedSeats] = useState([]);
+  const [availableSeats, setAvailableSeats] = useState(80);
+  const navigate = useNavigate();
 
-  // Utility functions
-  const bookSeats = (seatCount) => {
-    if (seatCount > 7 || seatCount < 1) {
-      alert("You can book between 1 and 7 seats at a time.");
+  // fetching seat data from the database
+  const fetchSeatsData = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found");
       return;
     }
 
-    const seatIndices = findAvailableSeats(seatCount);
-    if (seatIndices.length === seatCount) {
-      const updatedSeats = [...seats];
-      seatIndices.forEach((index) => (updatedSeats[index] = true));
-      setSeats(updatedSeats);
-      setBookedCount(bookedCount + seatCount);
-      alert(`Successfully booked ${seatCount} seats.`);
-    } else {
-      alert("Not enough nearby seats available.");
+    try {
+      const response = await axios.get(
+        "https://trainbooking-backend-yaa3.onrender.com/api/seats",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+
+      if (response.status === 200 && Array.isArray(response.data.seats)) {
+        const bookedSeatsList = response.data.seats
+          .filter((seat) => seat.isBooked)
+          .map((seat) => `${seat.rowNumber}-${seat.seatNo}`); 
+
+        setBookedSeats(bookedSeatsList);
+        setTotalSeats(response.data.seats.length);
+        setAvailableSeats(response.data.seats.length - bookedSeatsList.length);
+      } else {
+        console.error("Unexpected API response:", response.data);
+      }
+    } catch (error) {
+      console.error(
+        "Error fetching seat data:",
+        error.response?.data || error.message
+      );
     }
   };
 
-  const findAvailableSeats = (count) => {
-    // Try to find seats in a single row first
-    for (let row = 0; row < 12; row++) {
-      const start = row * 7;
-      const rowSeats = seats.slice(start, start + (row === 11 ? 3 : 7));
-      const indices = [];
-      rowSeats.forEach((seat, idx) => {
-        if (!seat && indices.length < count) indices.push(start + idx);
-      });
-      if (indices.length === count) return indices;
+  useEffect(() => {
+    fetchSeatsData();
+  }, []);
+
+  const handleBookSeats = async (event) => {
+    event.preventDefault();
+    const numSeats = parseInt(event.target.seats.value, 10);
+
+    if (isNaN(numSeats) || numSeats < 1 || numSeats > 7) {
+      alert("Please enter a valid number of seats (1-7).");
+      return;
     }
 
-    // Try to find nearby seats if one row is not available
-    const indices = [];
-    seats.forEach((seat, index) => {
-      if (!seat && indices.length < count) indices.push(index);
-    });
-    return indices;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("No token found. Please log in.");
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        "https://trainbooking-backend-yaa3.onrender.com/api/seats/bookticket",
+        { seats: numSeats },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // console.log("API Response:", response.data);
+
+      if (
+        response.status === 200 &&
+        Array.isArray(response.data.allocatedSeats)
+      ) {
+        const newBookedSeats = response.data.allocatedSeats.map(
+          (seat) => Number(seat.match(/\d+$/)[0]) 
+        );
+
+        setBookedSeats((prevBookedSeats) => [
+          ...prevBookedSeats,
+          ...newBookedSeats,
+        ]);
+        setAvailableSeats(
+          (prevAvailable) => prevAvailable - newBookedSeats.length
+        );
+        fetchSeatsData();   // refreshing the seat data
+      } else {
+        console.error("Unexpected API response:", response.data);
+      }
+    } catch (error) {
+      console.error(
+        "Error booking seats:",
+        error.response?.data || error.message
+      );
+    }
   };
 
-  const resetBooking = () => {
-    setSeats(Array(80).fill(null));
-    setBookedCount(0);
-    alert("All bookings have been reset.");
+  const handleResetBookings = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("No token found. Please log in.");
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        "https://trainbooking-backend-yaa3.onrender.com/api/seats/resetbooking",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log("API Response:", response.data);
+
+      if (response.status === 200) {
+        setBookedSeats([]);
+        setAvailableSeats(totalSeats);
+        fetchSeatsData();
+        alert("Seats Reset successfully");
+      } else {
+        console.error("Unexpected API response:", response.data);
+      }
+    } catch (error) {
+      console.error(
+        "Error resetting bookings:",
+        error.response?.data || error.message
+      );
+    }
   };
 
-  // Render component
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-gray-100 min-h-screen flex flex-col lg:flex-row lg:space-x-6">
-      {/* Seat Grid */}
-      <div className="flex-1">
-        <h1 className="text-2xl font-bold mb-6 text-center">Ticket Booking</h1>
-        <div className="grid grid-cols-7 gap-2 mb-6">
-          {seats.map((seat, index) => (
-            <div
-              key={index}
-              className={`p-4 rounded text-center font-bold text-white ${
-                seat ? "bg-yellow-500" : "bg-green-500"
-              }`}
-            >
-              {index + 1}
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-center items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-yellow-500 rounded"></div>
-            <span className="font-bold">Booked Seats = {bookedCount}</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-green-500 rounded"></div>
-            <span className="font-bold">Available Seats = {80 - bookedCount}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Booking Section */}
-      <div className="flex-1 items-center justify-center lg:max-w-sm bg-white p-6 rounded shadow-md">
-        <h2 className="text-xl font-bold mb-4">Book Your Seats</h2>
-        <div className="flex flex-col space-y-4">
-          <input
-            type="number"
-            id="seatCount"
-            placeholder="Seats (1-7)"
-            className="border p-2 rounded text-center"
+    <div className="flex flex-col min-h-screen bg-gray-200">
+      {/* header */}
+      <header className="flex justify-between items-center p-4 bg-blue-600 text-white shadow-md">
+        <div className="flex items-center gap-2">
+          <img
+            src="https://img.freepik.com/premium-vector/train-with-train-front-logo-that-says-train_788759-1678.jpg"
+            alt="Train Logo"
+            className="w-8 h-8"
           />
-          <button
-            onClick={() =>
-              bookSeats(Number(document.getElementById("seatCount").value))
-            }
-            className="bg-blue-500 text-white px-4 py-2 rounded w-full"
+          <h1 className="text-lg md:text-xl font-bold">Train Ticket Booking</h1>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 px-3 py-1 rounded hover:bg-red-600 text-sm md:text-base"
+        >
+          Logout
+        </button>
+      </header>
+
+      <div className="flex flex-col md:flex-row flex-1 p-4 md:p-6 gap-4 md:gap-6">
+        {/* seats info grid */}
+        <div className="flex-1 bg-white p-4 md:p-6 rounded-lg shadow-md">
+          <h2 className="text-lg md:text-xl font-bold text-center mb-4">
+            Select Your Seats
+          </h2>
+          {/* booking status */}
+          <div className="flex justify-between mb-4 p-2 text-sm md:text-base">
+            <span className="bg-yellow-500 px-2 py-1 rounded text-white">
+              Booked Seats: {bookedSeats.length}
+            </span>
+            <span className="bg-green-500 px-2 py-1 rounded text-white">
+              Available Seats: {availableSeats}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 md:grid-cols-7 gap-2">
+            {totalSeats &&
+              Array.from({ length: totalSeats }, (_, i) => {
+                const row = Math.floor(i / 7) + 1;
+                const seat = (i % 7) + 1;
+                const uniqueId = `${row}-${seat}`;
+
+                return (
+                  <div
+                    key={uniqueId}
+                    className={`w-16 h-8 md:w-20 md:h-10 flex items-center justify-center rounded-md text-white font-bold text-sm md:text-base transition ${
+                      bookedSeats.includes(uniqueId)
+                        ? "bg-red-500"
+                        : "bg-green-500"
+                    }`}
+                  >
+                    {`Seat ${i + 1}`}
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+
+        {/* booking form */}
+        <div className="w-full md:w-1/3 bg-white p-4 md:p-6 rounded-lg shadow-md flex flex-col items-center">
+          <h3 className="text-lg font-bold mb-2">Book Seats</h3>
+          <form
+            onSubmit={handleBookSeats}
+            className="w-full flex flex-col gap-2"
           >
-            Book
-          </button>
-          <button
-            onClick={resetBooking}
-            className="bg-red-500 text-white px-4 py-2 rounded w-full"
-          >
-            Reset Booking
-          </button>
+            <input
+              type="number"
+              name="seats"
+              placeholder="Enter seats (1-7)"
+              min="1"
+              max="7"
+              className="border rounded px-3 py-2 w-full text-sm md:text-base"
+            />
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm md:text-base"
+            >
+              Book Seats
+            </button>
+            <button
+              type="button"
+              onClick={handleResetBookings}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm md:text-base"
+            >
+              Reset Booking
+            </button>
+          </form>
         </div>
       </div>
     </div>
