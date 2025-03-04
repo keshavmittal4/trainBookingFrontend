@@ -1,7 +1,7 @@
-# 🎟️ Seat Booking System
+# 🎟️ Train Seat Booking System
 
 ## 📌 Overview
-The **Seat Booking System** is a web-based application that allows users to book seats for events, movies, or transportation. It includes user authentication, total and availability status, seat reset functionality, and booking confirmation.
+The **Train Seat Booking System** is a web-based application that allows users to book seats for events, movies, or transportation. It includes user authentication, total and availability status, seat reset functionality, and booking confirmation.
 
 ## ✨ Features
 
