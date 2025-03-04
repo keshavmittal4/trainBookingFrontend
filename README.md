@@ -1,55 +1,55 @@
-Seat Booking System
+# 🎟️ Seat Booking System
 
-Overview
+## 📌 Overview
+The **Seat Booking System** is a web-based application that allows users to book seats for events, movies, or transportation. It includes user authentication, total and availability status, seat reset functionality, and booking confirmation.
 
-The Seat Booking System is a web-based application that allows users to book seats for events, movies, or transportation. It includes user authentication, total and availability status, reset booked seats and seat booking confirmation.
+## ✨ Features
 
-Features
+✅ **User Authentication**: Secure login and signup functionality.
 
-User Authentication: Login and Signup functionality.
+✅ **Seat Selection**: Users can select available seats from a visual interface.
 
-Seat Selection: Users can select available seats from a visual interface.
+✅ **Booking Confirmation**: Users receive confirmation upon successful booking.
 
-Booking Confirmation: Users receive confirmation upon successful booking.
+✅ **Storage Support**: Data is stored in the database to track booked seats persistently.
 
-Storage Support: Data is stored in the database so that users can see seats they already booked.
+## 🛠️ Tech Stack
 
-Tech Stack
+🚀 **Frontend**: React.js, Axios, React-Router-Dom, React Hooks, Tailwind CSS
 
-Frontend: React.js, Axios, React-Router-Dom, React Hooks, Tailwind CSS
+💾 **Backend**: Node.js, MongoDB, Express.js, JWT
 
-Backend: Node.js, MongoDB, Express.js, JWT
+🌍 **Deployment**: Vercel (Frontend), Render (Backend)
 
-Deployment: Vercel (Frontend), Render (Backend)
+## 🚀 Installation & Setup
 
+1️⃣ **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/seat-booking.git
+   cd seat-booking
+   ```
+2️⃣ **Install dependencies:**
+   ```bash
+   npm install
+   ```
+3️⃣ **Start the development server:**
+   ```bash
+   npm run dev
+   ```
 
-Installation & Setup
+## 🎯 Usage
 
-Clone the repository:
+1️⃣ **Sign up or log in** to your account.
 
-git clone https://github.com/your-username/seat-booking.git
-cd seat-booking
+2️⃣ **Navigate** to the seat selection page.
 
-Install dependencies:
+3️⃣ **Enter the number of seats** you want to book based on availability and confirm your booking.
 
-npm install
+## 🔮 Future Enhancements
 
-Start the development server:
+🔹 **Integration with IRCTC API** to fetch train data.
 
-npm run dev
+🔹 **Payment Gateway** for paid bookings.
 
-Usage
+🔹 **Improved UI/UX** with animations and modern styling.
 
-Sign up or log in.
-
-Navigate to the seat selection page.
-
-Enter number of seats you want to book based on the available seats and confirm your booking.
-
-Future Enhancements
-
-Integration with IRCTC API to get Trains data.
-
-Payment gateway for paid bookings.
-
-Improved UI/UX with animations.
